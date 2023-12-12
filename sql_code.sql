@@ -45,8 +45,13 @@ MODIFY COLUMN hire_date DATE;
 
 -- Convert termdate values to date and remove time
 UPDATE hr
-SET termdate = date(STR_TO_DATE(termdate, '%Y-%m-%d %H:%i:%s UTC'))
-WHERE termdate IS NOT NULL AND termdate != ' ';
+SET termdate = IF(termdate IS NOT NULL AND termdate != '', date(str_to_date(termdate, '%Y-%m-%d %H:%i:%s UTC')), '0000-00-00')
+WHERE true;
+
+SELECT termdate from hr;
+
+SET sql_mode = 'ALLOW_INVALID_DATES';
+
 
 
 -- Convert termdate column to date
@@ -76,14 +81,14 @@ SELECT COUNT(*) FROM hr WHERE termdate > CURDATE();
 -- 1. What is the gender breakdown of employees in the company?
 SELECT gender, COUNT(*) AS count
 FROM hr
-WHERE age >= 18
+WHERE age >= 18 and termdate='0000-00-00'
 GROUP BY gender;
 
 
 -- 2. What is the race/ethnicity breakdown of employees in the company?
 SELECT race, COUNT(*) AS count
 FROM hr
-WHERE age >= 18
+WHERE age >= 18 and  termdate='0000-00-00'
 GROUP BY race
 ORDER BY count DESC;
 
@@ -93,11 +98,11 @@ SELECT
   MIN(age) AS youngest,
   MAX(age) AS oldest
 FROM hr
-WHERE age >= 18;
+WHERE age >= 18 AND termdate='0000-00-00';
 
 SELECT FLOOR(age/10)*10 AS age_group, COUNT(*) AS count
 FROM hr
-WHERE age >= 18
+WHERE age >= 18 AND  termdate='0000-00-00'
 GROUP BY FLOOR(age/10)*10;
 
 SELECT 
@@ -113,7 +118,7 @@ SELECT
 FROM 
   hr
 WHERE 
-  age >= 18
+  age >= 18 and  termdate='0000-00-00'
 GROUP BY age_group
 ORDER BY age_group;
 
@@ -138,7 +143,7 @@ ORDER BY age_group, gender;
 -- 4. How many employees work at headquarters versus remote locations?
 SELECT location, COUNT(*) as count
 FROM hr
-WHERE age >= 18
+WHERE age >= 18 and  termdate='0000-00-00'
 GROUP BY location;
 
 
@@ -148,15 +153,12 @@ SELECT ROUND(AVG(DATEDIFF(termdate, hire_date))/365,0) AS avg_length_of_employme
 FROM hr
 WHERE termdate <> '0000-00-00' AND termdate <= CURDATE() AND age >= 18;
 
-SELECT ROUND(AVG(DATEDIFF(termdate, hire_date)),0)/365 AS avg_length_of_employment
-FROM hr
-WHERE termdate <= CURDATE() AND age >= 18;
 
 
 -- 6. How does the gender distribution vary across departments?
 SELECT department, gender, COUNT(*) as count
 FROM hr
-WHERE age >= 18
+WHERE age >= 18 AND  termdate='0000-00-00'
 GROUP BY department, gender
 ORDER BY department;
 
@@ -164,7 +166,7 @@ ORDER BY department;
 -- 7. What is the distribution of job titles across the company?
 SELECT jobtitle, COUNT(*) as count
 FROM hr
-WHERE age >= 18
+WHERE age >= 18 AND  termdate='0000-00-00'
 GROUP BY jobtitle
 ORDER BY jobtitle DESC;
 
@@ -183,7 +185,7 @@ ORDER BY termination_rate DESC;
 -- 9. What is the distribution of employees across locations by state?
 SELECT location_state, COUNT(*) as count
 FROM hr
-WHERE age >= 18
+WHERE age >= 18 AND  termdate='0000-00-00'
 GROUP BY location_state
 ORDER BY count DESC;
 
